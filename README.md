@@ -9,8 +9,8 @@ Then move to the folder and run
 ```bash
 php bin/console app:parselog
 ```
-This will parse the log file `storage/gobankingrates.com.access.log` 
-and output a CSV `storage/file.csv` with the parsed info
+This will parse the log file `./storage/gobankingrates.com.access.log` 
+and output a CSV `./storage/file.csv` with the parsed info
 
 About
 -
