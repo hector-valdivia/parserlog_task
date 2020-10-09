@@ -57,8 +57,7 @@ class PaseLogFileCommand extends Command
                 $result = $parser->parse($user_agent);
 
                 $output->writeln( $record->country . ',' . $record->city );
-                $output->writeln( $result->ua->family );
-                $output->writeln( $result->ua->family );
+                $output->writeln( $result->ua->family );          
                 $output->writeln( $result->os->family );
                 $output->writeln( $this->deviceType($result->device->family, $result->os->family) );
 
