@@ -32,7 +32,7 @@ class PaseLogFileCommand extends Command
 
         try {
             $output->writeln("<info>Reading log access ". realpath(".") ."/storage/gobankingrates.com.access.log</info>");
-            $iterator = $this->readFile('storage/gobankingrates.com.access.log');
+            $iterable_lines = $this->readFile('storage/gobankingrates.com.access.log');
 
             $output->writeln("<info>Reading DB GeoLite2-City ". realpath(".") ."/storage/GeoLite2-City.mmdb</info>");
             $geolite_reader = new Reader('storage/GeoLite2-City.mmdb');
@@ -47,7 +47,7 @@ class PaseLogFileCommand extends Command
 
             $output->writeln("<info>Start............................................................</info>");
 
-            foreach ($iterator as $line) {
+            foreach ($iterable_lines as $line) {
                 if (empty($line)){ break; }
                 $output->writeln("<info>$line</info>");
                 preg_match('/(.*?) (.*?) (.*?) \[(.*?)(?= ) (.*?)\] \"(.*?) (.*?)(HTTP\/.*)?\" (.*?) (.*?) \"(.*?)\" \"(.*?)\"/', $line, $matches);
