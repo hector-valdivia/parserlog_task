@@ -1,4 +1,5 @@
-#Log parser Task
+Log parser Task
+-
 ### The instruction to make it work
 Install the dependencies with composer
 ```bash
