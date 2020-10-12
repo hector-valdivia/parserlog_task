@@ -51,7 +51,7 @@ class PaseLogFileCommand extends Command
 
             $output->writeln("<info>Start............................................................</info>");
 
-            foreach ($iterator as $line) {
+            foreach ($iterable_lines as $line) {
                 if (empty($line)){ break; }
                 $output->writeln("<info>$line</info>");
 
