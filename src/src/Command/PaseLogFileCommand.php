@@ -51,7 +51,7 @@ class PaseLogFileCommand extends Command
             fputcsv($fp, ['log', 'ip', 'country', 'city', 'device', 'browser']);
 
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('Continue with this action (write "y" to confirm)?', false);
+            $question = new ConfirmationQuestion('Continue with this action (press enter to confirm)?', true);
             if (!$helper->ask($input, $output, $question)) {
                 return Command::SUCCESS;
             }
