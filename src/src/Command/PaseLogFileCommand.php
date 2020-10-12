@@ -7,6 +7,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use GeoIp2\Database\Reader;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use UAParser\Parser;
 
 class PaseLogFileCommand extends Command
@@ -36,7 +37,7 @@ class PaseLogFileCommand extends Command
             $output_file     = realpath(".") ."/storage/file.csv";
 
             $output->writeln("<info>Reading log access ". $access_log_file ."</info>");
-            $iterator = $this->readFile($access_log_file);
+            $iterable_lines = $this->readFile($access_log_file);
 
             $output->writeln("<info>Reading DB GeoLite2-City ". $geolite_db ."</info>");
             $geolite_reader = new Reader($geolite_db);
@@ -49,8 +50,13 @@ class PaseLogFileCommand extends Command
             $fp = fopen($output_file, 'w');
             fputcsv($fp, ['log', 'ip', 'country', 'city', 'device', 'browser']);
 
-            $output->writeln("<info>Start............................................................</info>");
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion('Continue with this action (write "y" to confirm)?', false);
+            if (!$helper->ask($input, $output, $question)) {
+                return Command::SUCCESS;
+            }
 
+            $start_time = microtime(true);
             foreach ($iterable_lines as $line) {
                 if (empty($line)){ break; }
                 $output->writeln("<info>$line</info>");
@@ -77,10 +83,13 @@ class PaseLogFileCommand extends Command
                     'browser'   => $result->ua->family,
                 ]);
             }
-
             fclose($fp);
 
-            $output->writeln("<info>Done!! Your File is in ". $output_file ."</info>");
+            // End clock time in seconds
+            $end_time = microtime(true);
+            $execution_time = round(($end_time - $start_time) / 60, PHP_ROUND_HALF_DOWN);
+
+            $output->writeln("<info>Done in ".$execution_time." min!! Your File is in ". $output_file ."</info>");
 
             return Command::SUCCESS;
         }catch (\Exception $e){
