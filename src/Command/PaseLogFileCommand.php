@@ -31,18 +31,22 @@ class PaseLogFileCommand extends Command
         $parser = Parser::create();
 
         try {
-            $output->writeln("<info>Reading log access ". realpath(".") ."/storage/gobankingrates.com.access.log</info>");
-            $iterator = $this->readFile('storage/gobankingrates.com.access.log');
+            $access_log_file = realpath(".") ."/storage/gobankingrates.com.access.log";
+            $geolite_db      = realpath(".") ."/storage/GeoLite2-City.mmdb";
+            $output_file     = realpath(".") ."/storage/file.csv";
 
-            $output->writeln("<info>Reading DB GeoLite2-City ". realpath(".") ."/storage/GeoLite2-City.mmdb</info>");
-            $geolite_reader = new Reader('storage/GeoLite2-City.mmdb');
+            $output->writeln("<info>Reading log access ". $access_log_file ."</info>");
+            $iterator = $this->readFile($access_log_file);
+
+            $output->writeln("<info>Reading DB GeoLite2-City ". $geolite_db ."</info>");
+            $geolite_reader = new Reader($geolite_db);
 
             $output->writeln("<info>Creating file.csv</info>");
-            if ( file_exists('storage/file.csv') ){
+            if ( file_exists($output_file) ){
                 $date = (new \DateTime())->format('Ymdhms');
-                rename("storage/file.csv", "storage/file_{$date}.csv");
+                rename($output_file, "storage/file_{$date}.csv");
             }
-            $fp = fopen('storage/file.csv', 'w');
+            $fp = fopen($output_file, 'w');
             fputcsv($fp, ['log', 'ip', 'country', 'city', 'device', 'browser']);
 
             $output->writeln("<info>Start............................................................</info>");
@@ -50,14 +54,16 @@ class PaseLogFileCommand extends Command
             foreach ($iterator as $line) {
                 if (empty($line)){ break; }
                 $output->writeln("<info>$line</info>");
+
+                //ip remote_log_name user_id [date timezone] "request_method path request_version" estatus length "referrer" "user_agent"
                 preg_match('/(.*?) (.*?) (.*?) \[(.*?)(?= ) (.*?)\] \"(.*?) (.*?)(HTTP\/.*)?\" (.*?) (.*?) \"(.*?)\" \"(.*?)\"/', $line, $matches);
-                list($same_line, $ip, $remote_log_name, $user_id, $date, $timezone, $request_method, $path, $request_version, $estatus, $length, $referrer, $user_agent) = $matches;
+                $ip = $matches[1];
+                $user_agent = $matches[12];
 
                 $record = $this->getCountryAndCity($geolite_reader, $ip);
                 $result = $parser->parse($user_agent);
 
                 $output->writeln( $record->country . ',' . $record->city );
-                $output->writeln( $result->ua->family );
                 $output->writeln( $result->ua->family );
                 $output->writeln( $result->os->family );
                 $output->writeln( $this->deviceType($result->device->family, $result->os->family) );
@@ -74,7 +80,7 @@ class PaseLogFileCommand extends Command
 
             fclose($fp);
 
-            $output->writeln("<info>Done!! Your File is in ". realpath(".") ."/storage/file.csv</info>");
+            $output->writeln("<info>Done!! Your File is in ". $output_file ."</info>");
 
             return Command::SUCCESS;
         }catch (\Exception $e){
